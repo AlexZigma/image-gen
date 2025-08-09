@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask, jsonify, send_from_directory, request
 from gan_model import generate_image
 import os
 from datetime import datetime
@@ -12,15 +12,22 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///images.db'
 app.config['GENERATED_DIR'] = "generated"
 db = SQLAlchemy(app)
 
-# images_data = []
+# create dir 'generated' if it not exists
+if not os.path.exists(app.config['GENERATED_DIR']):
+    os.makedirs(app.config['GENERATED_DIR'])
+
 
 class Image(db.Model):
     id = db.Column(db.String(255), primary_key=True)
     filename = db.Column(db.String(255), nullable=False)
 
 # generate new image
-@app.route("/generate", methods=["GET"])
+@app.route("/generate", methods=["POST"])
 def generate():
+    data = request.get_json()
+    prompt = data.get('prompt')
+    print(prompt)
+    
     image_id = str(uuid.uuid4())
     filename = f"{image_id}.png"
     path = os.path.join(app.config['GENERATED_DIR'], filename)
@@ -56,8 +63,8 @@ def get_image(filename):
 @app.route('/delete/<image_id>', methods=['DELETE'])
 def delete_image(image_id):
     image = db.get_or_404(Image, image_id)
-    if not image:
-        return jsonify({"error": "Image not found"}), 404
+    # if not image:
+    #     return jsonify({"error": "Image not found"}), 404
     
     # remove from disk
     path = os.path.join(app.config['GENERATED_DIR'], image.filename)

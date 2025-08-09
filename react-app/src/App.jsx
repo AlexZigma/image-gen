@@ -9,7 +9,7 @@ import ImgCard from './img-card'
 function App() {
   const [images, setImages] = useState([])
   // const [newImage, setNewImage] = useState([])
-  const [imageUrl, setImageUrl] = useState([])
+  const [newPrompt, setNewPrompt] = useState('')
 
   // get images from backend
   useEffect(() => {
@@ -75,21 +75,25 @@ function App() {
     // console.log(event.target.files[0])
   }
 
-  // delete image localy
-  // function deleteImage(id) {
-  //   const remainingImages = images.filter((img) => img.id !== id)
-  //   setImages(remainingImages)
-  // }
-
   // generate image and add to galery
   const handleGenerate = async () => {
-    const res = await fetch('http://localhost:5000/generate');
+    const postData = { prompt: newPrompt };
+    const requestOptions = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(postData)
+    };
+
+    const res = await fetch('http://localhost:5000/generate', requestOptions);
     const data = await res.json();
-    const newImage = {id: data.id, filename: data.filename}
-    setImages((prev) => 
+    const newImage = { id: data.id, filename: data.filename };
+    setImages((prev) =>
       [...prev, newImage]
-      );
+    );
   }
+
 
   const grid = images.map((img) => (
     <ImgCard
@@ -101,13 +105,14 @@ function App() {
 
   return (
     <>
-      <div>
-        <input
+      <div className='input'>
+        {/* <input
           type="file"
           accept='image/*'
           placeholder="Image URL"
-          onChange={handleFileChange} />
-        <button type="button" onClick={addImage}>Add image</button>
+          onChange={handleFileChange} /> */}
+        <input type="text" onChange={(e) => setNewPrompt(e.target.value)} />
+        {/* <button type="button" onClick={addImage}>Add image</button> */}
         <button type="button" onClick={handleGenerate}>Generate</button>
       </div>
       <div className='grid'>
