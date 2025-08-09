@@ -53,7 +53,7 @@ function App() {
   const deleteImage = (id) => {
     fetch(`http://localhost:5000/delete/${id}`, { method: "DELETE" })
       .then(() => {
-        setImages(prev => prev.filter(img => img.id !== id));
+        setImages(prev => prev.filter(image => image.id !== id));
       })
       .catch(err => console.error(err));
   };
@@ -85,16 +85,15 @@ function App() {
   const handleGenerate = async () => {
     const res = await fetch('http://localhost:5000/generate');
     const data = await res.json();
-    const newImage = {id: data.id, img: data.img}
+    const newImage = {id: data.id, filename: data.filename}
     setImages((prev) => 
       [...prev, newImage]
       );
-    // console.log(imageUrl)
   }
 
   const grid = images.map((img) => (
     <ImgCard
-      img={img.img}
+      img={`http://localhost:5000/images/${img.filename}`}
       id={img.id}
       key={img.id}
       deleteImage={deleteImage} />
